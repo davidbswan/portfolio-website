@@ -117,11 +117,11 @@
     object-fit:cover;
     object-position:left center;
   }
-  /* Gradient scrim: keeps the avatar visible on the left while darkening
-     the right two-thirds so the hero text stays legible over it */
+  /* Slight gradient scrim: runs only from the middle to the right edge,
+     leaving the avatar's side of the frame untouched */
   .hero-media::after{
     content:'';position:absolute;inset:0;z-index:1;
-    background: none;
+    background: linear-gradient(90deg, transparent 0%, transparent 50%, rgba(38,49,59,0.55) 100%);
   }
   /* Extra top scrim so the nav stays legible over any part of the video */
   .hero-media::before{
