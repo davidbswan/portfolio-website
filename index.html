@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>David Swan — Marketing Director &amp; Visual Storyteller</title>
+<meta name="description" content="David Swan — Marketing Director and visual storyteller. Strategic thinking, creative eye, results-driven.">
+
+<!-- Fonts: Satoshi (headings) via Fontshare, Inter (body) via Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,900,500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --primary:#6B8798;
+    --deep:#445564;
+    --light-blue:#9CB2BE;
+    --accent:#CDB8A3;
+    --bg:#F8F8F6;
+    --surface:#ECEFF1;
+    --text:#1F2328;
+    --max-w:1240px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:'Inter', -apple-system, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  h1,h2,h3,.display{
+    font-family:'Satoshi', 'Inter', sans-serif;
+    font-weight:900;
+    letter-spacing:-0.02em;
+    line-height:1.05;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+
+  .wrap{max-width:var(--max-w);margin:0 auto;padding:0 32px;}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:22px 0;
+    transition:background .4s ease, padding .4s ease, box-shadow .4s ease;
+  }
+  header.scrolled{
+    background:rgba(248,248,246,0.92);
+    backdrop-filter:blur(10px);
+    padding:14px 0;
+    box-shadow:0 1px 0 rgba(31,35,40,0.06);
+  }
+  nav.wrap{display:flex;align-items:center;justify-content:space-between;}
+  .logo{
+    font-family:'Satoshi',sans-serif;
+    font-weight:900;
+    font-size:1.15rem;
+    letter-spacing:-0.01em;
+    color:var(--bg);
+    transition:color .4s ease;
+  }
+  header.scrolled .logo{color:var(--deep);}
+  .logo span{color:var(--accent);}
+
+  .nav-links{display:flex;gap:40px;list-style:none;}
+  .nav-links a{
+    font-size:0.9rem;font-weight:500;color:var(--bg);
+    position:relative;padding:4px 0;transition:color .4s ease;
+  }
+  header.scrolled .nav-links a{color:var(--deep);}
+  .nav-links a::after{
+    content:'';position:absolute;left:0;bottom:0;height:1px;width:0;
+    background:currentColor;transition:width .25s ease;
+  }
+  .nav-links a:hover::after{width:100%;}
+
+  .nav-cta{
+    font-size:0.85rem;font-weight:600;
+    padding:10px 22px;border:1.5px solid var(--bg);border-radius:999px;
+    color:var(--bg);transition:all .4s ease;
+  }
+  header.scrolled .nav-cta{border-color:var(--deep);color:var(--deep);}
+  .nav-cta:hover{background:var(--bg);color:var(--deep);}
+  header.scrolled .nav-cta:hover{background:var(--deep);color:var(--bg);}
+
+  .menu-toggle{display:none;color:var(--bg);font-size:1.6rem;cursor:pointer;background:none;border:none;}
+  header.scrolled .menu-toggle{color:var(--deep);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    height:100vh;
+    display:flex;align-items:center;
+    background:linear-gradient(155deg, var(--deep) 0%, #33414d 55%, #26313b 100%);
+    overflow:hidden;
+  }
+
+  /* Looping AI-avatar hero video */
+  .hero-media{
+    position:absolute;inset:0;z-index:0;
+    overflow:hidden;
+  }
+  .hero-media video{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    object-fit:cover;
+    object-position:left center;
+  }
+  /* Gradient scrim: keeps the avatar visible on the left while darkening
+     the right two-thirds so the hero text stays legible over it */
+  .hero-media::after{
+    content:'';position:absolute;inset:0;z-index:1;
+    background: none;
+  }
+  /* Extra top scrim so the nav stays legible over any part of the video */
+  .hero-media::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:140px;z-index:1;
+    background:none;
+    pointer-events:none;
+  }
+
+  .scan-lines{
+    position:absolute;inset:0;z-index:1;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+  }
+
+  .hero-content{
+    position:relative;z-index:2;width:100%;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .hero-text{max-width:600px;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:0.78rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--light-blue);margin-bottom:clamp(12px,2vh,20px);
+  }
+  .eyebrow::before{content:'';width:28px;height:1px;background:var(--accent);}
+
+  .hero h1{
+    font-size:clamp(2rem, 4.6vw + 1rem, 4.4rem);
+    color:var(--bg);
+    max-width:15ch;
+  }
+  .hero h1 em{
+    font-style:normal;color:var(--accent);
+  }
+
+  .hero-sub{
+    max-width:540px;margin-top:clamp(12px,2vh,20px);
+    font-size:clamp(0.95rem,1.1vw + 0.6rem,1.1rem);color:var(--surface);opacity:0.85;
+    font-weight:400;
+  }
+
+  .hero-actions{display:flex;gap:16px;margin-top:clamp(20px,3vh,32px);flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--accent);color:var(--deep);
+    padding:16px 34px;border-radius:999px;font-weight:600;font-size:0.95rem;
+    transition:transform .25s ease, box-shadow .25s ease;
+    display:inline-flex;align-items:center;gap:10px;
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(205,184,163,0.3);}
+  .btn-secondary{
+    color:var(--bg);padding:16px 30px;border-radius:999px;font-weight:600;font-size:0.95rem;
+    border:1.5px solid rgba(248,248,246,0.35);
+    transition:border-color .25s ease, background .25s ease;
+  }
+  .btn-secondary:hover{border-color:var(--bg);background:rgba(248,248,246,0.08);}
+
+  .scroll-cue{
+    position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+    z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;
+    color:var(--light-blue);font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;
+  }
+  .scroll-cue .line{width:1px;height:36px;background:linear-gradient(var(--accent), transparent);animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:0.3;}50%{opacity:1;}}
+
+  /* ---------- SECTION SHARED ---------- */
+  section{padding:130px 0;}
+  .section-tag{
+    font-size:0.8rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--primary);margin-bottom:18px;display:flex;align-items:center;gap:10px;
+  }
+  .section-tag::before{content:'';width:28px;height:1px;background:var(--primary);}
+  .section-title{font-size:clamp(1.8rem, 3.4vw, 2.8rem);max-width:16ch;margin-bottom:24px;}
+  .section-lede{max-width:600px;color:#4a5259;font-size:1.05rem;}
+
+  .fade-up{opacity:0;transform:translateY(28px);transition:opacity .8s ease, transform .8s ease;}
+  .fade-up.in-view{opacity:1;transform:translateY(0);}
+
+  /* ---------- ABOUT TEASER ---------- */
+  .about{background:var(--bg);}
+  .about-grid{
+    display:grid;grid-template-columns:1.1fr 0.9fr;gap:80px;align-items:center;
+  }
+  .about-visual{
+    position:relative;aspect-ratio:4/5;border-radius:18px;overflow:hidden;
+    background:linear-gradient(140deg, var(--primary), var(--deep));
+  }
+  .about-visual::after{
+    content:'B.A. VISUAL ARTS · 2012';
+    position:absolute;bottom:24px;left:24px;color:var(--bg);
+    font-size:0.72rem;letter-spacing:0.12em;font-weight:600;opacity:0.85;
+  }
+  .about-visual .quote-mark{
+    position:absolute;top:24px;left:24px;font-family:'Satoshi',sans-serif;
+    font-size:4rem;color:rgba(248,248,246,0.25);font-weight:900;line-height:1;
+  }
+  .stat-row{display:flex;gap:44px;margin-top:40px;flex-wrap:wrap;}
+  .stat b{display:block;font-family:'Satoshi',sans-serif;font-size:2.1rem;font-weight:900;color:var(--deep);}
+  .stat span{font-size:0.82rem;color:#6b7278;text-transform:uppercase;letter-spacing:0.08em;}
+
+  .about-link{
+    display:inline-flex;align-items:center;gap:10px;margin-top:36px;
+    font-weight:600;color:var(--deep);border-bottom:1.5px solid var(--accent);padding-bottom:4px;
+    transition:gap .25s ease;
+  }
+  .about-link:hover{gap:16px;}
+
+  /* ---------- PORTFOLIO TEASER ---------- */
+  .portfolio{background:var(--deep);color:var(--bg);}
+  .portfolio .section-tag{color:var(--light-blue);}
+  .portfolio .section-tag::before{background:var(--light-blue);}
+  .portfolio .section-title{color:var(--bg);}
+  .portfolio .section-lede{color:var(--surface);opacity:0.75;}
+
+  .cat-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:60px;
+  }
+  .cat-card{
+    position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4;
+    background:linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border:1px solid rgba(248,248,246,0.12);
+    display:flex;flex-direction:column;justify-content:flex-end;padding:32px;
+    transition:transform .35s ease, border-color .35s ease;
+  }
+  .cat-card:hover{transform:translateY(-8px);border-color:var(--accent);}
+  .cat-card .num{
+    position:absolute;top:24px;right:28px;font-family:'Satoshi',sans-serif;
+    font-size:0.85rem;color:rgba(248,248,246,0.4);font-weight:700;
+  }
+  .cat-card .icon{font-size:1.8rem;margin-bottom:18px;}
+  .cat-card h3{font-size:1.5rem;margin-bottom:10px;}
+  .cat-card p{font-size:0.9rem;color:var(--surface);opacity:0.7;max-width:24ch;}
+  .cat-card .arrow{
+    margin-top:22px;width:34px;height:34px;border-radius:50%;
+    border:1px solid rgba(248,248,246,0.3);
+    display:flex;align-items:center;justify-content:center;
+    transition:background .25s ease, border-color .25s ease;
+  }
+  .cat-card:hover .arrow{background:var(--accent);border-color:var(--accent);color:var(--deep);}
+
+  /* ---------- CONTACT TEASER ---------- */
+  .contact{background:var(--bg);text-align:center;}
+  .contact .wrap{max-width:760px;}
+  .contact h2{font-size:clamp(2.2rem,5vw,3.6rem);}
+  .contact h2 em{font-style:normal;color:var(--primary);}
+  .contact p{margin:24px auto 0;max-width:480px;color:#4a5259;}
+  .contact .hero-actions{justify-content:center;margin-top:40px;}
+  .contact .btn-primary{background:var(--deep);color:var(--bg);}
+  .contact .btn-primary:hover{box-shadow:0 12px 30px rgba(68,85,100,0.25);}
+  .contact .btn-secondary{border-color:rgba(31,35,40,0.2);color:var(--deep);}
+  .contact .btn-secondary:hover{border-color:var(--deep);background:rgba(31,35,40,0.04);}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--surface);padding:50px 0;}
+  .footer-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}
+  .footer-row .logo{color:var(--deep);}
+  .socials{display:flex;gap:24px;list-style:none;}
+  .socials a{font-size:0.85rem;font-weight:500;color:var(--deep);opacity:0.7;transition:opacity .2s ease;}
+  .socials a:hover{opacity:1;}
+  .copyright{font-size:0.78rem;color:#6b7278;margin-top:28px;text-align:center;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .about-grid{grid-template-columns:1fr;gap:48px;}
+    .cat-grid{grid-template-columns:1fr;}
+    .nav-links{display:none;}
+    .menu-toggle{display:block;}
+
+    /* On narrower screens the avatar's position drifts as the loop plays,
+       so instead of cropping (cover) we show the full frame (contain) in a
+       fixed-height band up top, with the copy stacked below rather than
+       overlaid — avoids the character colliding with the headline at any
+       point in the animation. */
+    .hero{flex-direction:column;align-items:stretch;height:auto;min-height:auto;}
+    .hero-media{position:relative;height:56vh;min-height:340px;}
+    .hero-media video{object-fit:contain;background:#7C99AC;}
+    .hero-media::after{
+      background:linear-gradient(rgba(38,49,59,0) 60%, rgba(38,49,59,0.85) 100%);
+    }
+    .hero-content{
+      position:relative;justify-content:flex-start;
+      padding-top:44px;padding-bottom:64px;
+    }
+    .hero-text{max-width:100%;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 22px;}
+    section{padding:90px 0;}
+    .hero-actions{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <nav class="wrap">
+    <a href="#" class="logo">DAVID<span>.</span>SWAN</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#portfolio">Portfolio</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Let's talk</a>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-media" aria-hidden="true">
+    <video
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      poster="assets/hero-poster.jpg">
+      <source src="assets/hero-loop.webm" type="video/webm">
+      <source src="assets/hero-loop.mp4" type="video/mp4">
+    </video>
+    <div class="scan-lines"></div>
+  </div>
+
+  <div class="wrap hero-content">
+    <div class="hero-text">
+      <div class="eyebrow">Marketing Director · Visual Storyteller</div>
+      <h1>Big picture thinking. <em>Sharper</em> results.</h1>
+      <p class="hero-sub">I'm David Swan — I bring a trained artist's eye to brand strategy, and a marketing director's instinct for what actually moves the numbers. Fifteen years across global brands, showrooms, and campaigns, on two continents.</p>
+      <div class="hero-actions">
+        <a href="#portfolio" class="btn-primary">View the work →</a>
+        <a href="#about" class="btn-secondary">My story</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-cue"><span>Scroll</span><span class="line"></span></div>
+</section>
+
+<section class="about" id="about">
+  <div class="wrap about-grid">
+    <div class="fade-up">
+      <div class="section-tag">About</div>
+      <h2 class="section-title">Art school taught me to see. Marketing taught me to prove it works.</h2>
+      <p class="section-lede">From a BA in Visual Arts to a decade steering global marketing strategy — I've spent my career translating creative instinct into measurable brand growth. Based between the UK and Thailand, I've managed showrooms, campaigns, and teams across Asia and Europe.</p>
+      <div class="stat-row">
+        <div class="stat"><b>10+</b><span>Years in marketing</span></div>
+        <div class="stat"><b>2</b><span>Continents managed</span></div>
+        <div class="stat"><b>3</b><span>Director-level roles</span></div>
+      </div>
+      <a href="#" class="about-link">Read the full story →</a>
+    </div>
+    <div class="about-visual fade-up">
+      <div class="quote-mark">"</div>
+    </div>
+  </div>
+</section>
+
+<section class="portfolio" id="portfolio">
+  <div class="wrap">
+    <div class="fade-up">
+      <div class="section-tag">Selected Work</div>
+      <h2 class="section-title">Three lenses, one eye for detail.</h2>
+      <p class="section-lede">Strategy and craft, side by side — the marketing work that drives results, and the personal photography and film work that keeps the eye sharp.</p>
+    </div>
+    <div class="cat-grid">
+      <a href="#" class="cat-card fade-up">
+        <span class="num">01</span>
+        <span class="icon">📈</span>
+        <h3>Marketing</h3>
+        <p>Global campaigns, brand strategy, and go-to-market work.</p>
+        <span class="arrow">→</span>
+      </a>
+      <a href="#" class="cat-card fade-up">
+        <span class="num">02</span>
+        <span class="icon">📷</span>
+        <h3>Photography</h3>
+        <p>Editorial, travel, and product photography.</p>
+        <span class="arrow">→</span>
+      </a>
+      <a href="#" class="cat-card fade-up">
+        <span class="num">03</span>
+        <span class="icon">🎬</span>
+        <h3>Videography</h3>
+        <p>Short-form brand films and creative direction.</p>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="section-tag" style="justify-content:center;">Get in touch</div>
+    <h2>Got a project in mind? <em>Let's build it.</em></h2>
+    <p>Whether it's a brand strategy, a shoot, or a collaboration — I'd love to hear about it.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">Send a message →</a>
+      <a href="mailto:davidbswan@googlemail.com" class="btn-secondary">Email directly</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-row">
+      <a href="#" class="logo">DAVID<span>.</span>SWAN</a>
+      <ul class="socials">
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="mailto:davidbswan@googlemail.com">Email</a></li>
+      </ul>
+    </div>
+    <p class="copyright">© 2026 David Swan. Built in-house, one section at a time.</p>
+  </div>
+</footer>
+
+<script>
+  // Sticky header state
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Fade-up reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('in-view');
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
