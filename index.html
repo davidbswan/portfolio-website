@@ -288,15 +288,20 @@
     .cat-grid{grid-template-columns:1fr;}
     .nav-links{display:none;}
     .menu-toggle{display:block;}
+  }
 
-    /* On narrower screens the avatar's position drifts as the loop plays,
-       so instead of cropping (cover) we show the full frame (contain) in a
-       fixed-height band up top, with the copy stacked below rather than
-       overlaid — avoids the character colliding with the headline at any
-       point in the animation. */
+  /* Hero switches to a stacked layout earlier than the general 900px
+     breakpoint above: the hero text column has a fixed max-width, so on
+     narrower desktop/tablet widths it starts overlapping the character
+     graphic well before 900px is reached. 1280px keeps a clear gap between
+     the text and the desk/camera at all times.
+     Video is zoomed (cover) rather than shrunk (contain), cropped from the
+     right with the left edge anchored — that's where the character and
+     desk props sit, so they always stay in frame. */
+  @media (max-width:1280px){
     .hero{flex-direction:column;align-items:stretch;height:auto;min-height:auto;}
     .hero-media{position:relative;height:56vh;min-height:340px;}
-    .hero-media video{object-fit:contain;background:#7C99AC;}
+    .hero-media video{object-fit:cover;object-position:left center;}
     .hero-media::after{
       background:linear-gradient(rgba(38,49,59,0) 60%, rgba(38,49,59,0.85) 100%);
     }
