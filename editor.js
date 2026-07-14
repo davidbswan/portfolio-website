@@ -68,17 +68,108 @@
     });
   }
 
-  // ---- Per-element formatting toolbar ----
-  // Appears above whichever editable element currently has focus. Changes
-  // (color / font-weight / font-size) are applied as inline styles directly
-  // on that element, so they're captured automatically by save()'s DOM clone
-  // along with the text content. Formatting applies to the whole focused
-  // element, not a partial text selection inside it.
+  // ---- Per-element / per-word formatting toolbar ----
+  // Appears above whichever editable element currently has focus. If the
+  // user has highlighted a word or phrase inside the element, formatting
+  // applies to just that selection (wrapped in a <span class="site-editor-fmt">,
+  // same technique as the existing hand-coded highlight word on the homepage).
+  // If nothing is highlighted, it applies to the element's whole content.
+  //
+  // Font-size changes are stored as an "em" value relative to the wrapping
+  // span's parent, not a fixed pixel value. Since the parent (the original
+  // heading/paragraph) keeps its own CSS-driven responsive font-size at every
+  // breakpoint, the wrapped text's size scales proportionally right along
+  // with it instead of freezing at one fixed size on all screen widths.
+
+  function getTargetSpan(range) {
+    var text = range.toString();
+    if (!text) return null;
+    var node = range.commonAncestorContainer;
+    if (node.nodeType === 3) node = node.parentNode;
+    if (!node || node.nodeType !== 1) return null;
+    if (node.classList && node.classList.contains('site-editor-fmt') && node.textContent === text) {
+      return node;
+    }
+    if (node.children && node.children.length === 1 &&
+        node.children[0].classList && node.children[0].classList.contains('site-editor-fmt') &&
+        node.children[0].textContent === text && node.textContent === text) {
+      return node.children[0];
+    }
+    return null;
+  }
+
+  function currentRange() {
+    if (!activeEl) return null;
+    var sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      var r = sel.getRangeAt(0);
+      if (!r.collapsed && activeEl.contains(r.commonAncestorContainer)) return r.cloneRange();
+    }
+    var whole = document.createRange();
+    whole.selectNodeContents(activeEl);
+    return whole;
+  }
+
+  function applyToRange(range, mutator) {
+    if (!activeEl || !range) return;
+    var span = getTargetSpan(range);
+    if (!span) {
+      span = document.createElement('span');
+      span.className = 'site-editor-fmt';
+      var frag = range.extractContents();
+      // Don't wrap empty selections (e.g. a collapsed range on an empty element).
+      if (!frag.textContent) {
+        range.insertNode(frag);
+        return;
+      }
+      span.appendChild(frag);
+      range.insertNode(span);
+    }
+    mutator(span);
+
+    var sel = window.getSelection();
+    var newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    sel.removeAllRanges();
+    sel.addRange(newRange);
+  }
+
+  function unwrapSpan(span) {
+    var parent = span.parentNode;
+    if (!parent) return;
+    while (span.firstChild) parent.insertBefore(span.firstChild, span);
+    parent.removeChild(span);
+    parent.normalize();
+  }
+
+  function resetFormat() {
+    if (!activeEl) return;
+    var range = currentRange();
+    var span = range ? getTargetSpan(range) : null;
+    if (span) {
+      unwrapSpan(span);
+    } else {
+      var spans = activeEl.querySelectorAll('span.site-editor-fmt');
+      spans.forEach(unwrapSpan);
+    }
+  }
+
+  function stepFontSize(span, delta) {
+    var parentPx = parseFloat(window.getComputedStyle(span.parentElement || activeEl).fontSize) || 16;
+    var currentPx = parseFloat(window.getComputedStyle(span).fontSize) || parentPx;
+    var nextPx = Math.max(8, Math.min(400, currentPx + delta));
+    span.style.fontSize = (nextPx / parentPx).toFixed(3) + 'em';
+  }
 
   function buildFormatToolbar() {
     var toolbar = document.createElement('div');
     toolbar.id = 'site-editor-format-toolbar';
     toolbar.style.cssText = 'position:fixed;display:none;z-index:999998;background:#111;color:#fff;font-family:system-ui,sans-serif;font-size:12px;padding:8px 10px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.35);flex-direction:row;align-items:center;gap:10px;';
+
+    // All controls use 'mousedown' + preventDefault (not 'click') so the
+    // button never steals focus from the contentEditable element — that
+    // keeps the user's text selection (if any) intact so we know whether to
+    // format just the highlighted word/phrase or the whole element.
 
     var colorGroup = document.createElement('div');
     colorGroup.style.cssText = 'display:flex;gap:4px;align-items:center;';
@@ -87,8 +178,10 @@
       btn.type = 'button';
       btn.title = sw.label;
       btn.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.4);cursor:pointer;padding:0;background:' + sw.value + ';';
-      btn.addEventListener('click', function () {
-        if (activeEl) activeEl.style.color = sw.value;
+      btn.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        var range = currentRange();
+        applyToRange(range, function (span) { span.style.color = sw.value; });
       });
       colorGroup.appendChild(btn);
     });
@@ -97,8 +190,15 @@
     customColor.type = 'color';
     customColor.title = 'Custom color';
     customColor.style.cssText = 'width:20px;height:20px;border:0;padding:0;background:none;cursor:pointer;';
+    var savedRangeForColorPicker = null;
+    customColor.addEventListener('mousedown', function () {
+      // The native color picker steals focus once it opens, so capture the
+      // range now — it stays valid as a DOM reference even after the
+      // contentEditable loses focus.
+      savedRangeForColorPicker = currentRange();
+    });
     customColor.addEventListener('input', function (e) {
-      if (activeEl) activeEl.style.color = e.target.value;
+      applyToRange(savedRangeForColorPicker, function (span) { span.style.color = e.target.value; });
     });
     colorGroup.appendChild(customColor);
 
@@ -109,8 +209,10 @@
       btn.type = 'button';
       btn.textContent = w.label;
       btn.style.cssText = 'padding:4px 6px;border:0;border-radius:4px;background:#222;color:#fff;cursor:pointer;font-size:11px;';
-      btn.addEventListener('click', function () {
-        if (activeEl) activeEl.style.fontWeight = w.value;
+      btn.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        var range = currentRange();
+        applyToRange(range, function (span) { span.style.fontWeight = w.value; });
       });
       weightGroup.appendChild(btn);
     });
@@ -118,24 +220,25 @@
     var sizeGroup = document.createElement('div');
     sizeGroup.style.cssText = 'display:flex;gap:4px;align-items:center;border-left:1px solid #333;padding-left:10px;';
 
-    function stepSize(delta) {
-      if (!activeEl) return;
-      var current = parseFloat(window.getComputedStyle(activeEl).fontSize) || 16;
-      var next = Math.max(8, Math.min(200, current + delta));
-      activeEl.style.fontSize = next + 'px';
-    }
-
     var shrinkBtn = document.createElement('button');
     shrinkBtn.type = 'button';
     shrinkBtn.textContent = 'A-';
     shrinkBtn.style.cssText = 'padding:4px 6px;border:0;border-radius:4px;background:#222;color:#fff;cursor:pointer;font-size:11px;';
-    shrinkBtn.addEventListener('click', function () { stepSize(-2); });
+    shrinkBtn.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      var range = currentRange();
+      applyToRange(range, function (span) { stepFontSize(span, -2); });
+    });
 
     var growBtn = document.createElement('button');
     growBtn.type = 'button';
     growBtn.textContent = 'A+';
     growBtn.style.cssText = 'padding:4px 6px;border:0;border-radius:4px;background:#222;color:#fff;cursor:pointer;font-size:11px;';
-    growBtn.addEventListener('click', function () { stepSize(2); });
+    growBtn.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      var range = currentRange();
+      applyToRange(range, function (span) { stepFontSize(span, 2); });
+    });
 
     sizeGroup.appendChild(shrinkBtn);
     sizeGroup.appendChild(growBtn);
@@ -143,13 +246,11 @@
     var resetBtn = document.createElement('button');
     resetBtn.type = 'button';
     resetBtn.textContent = 'Reset';
-    resetBtn.title = 'Clear color/size/weight overrides on this element';
+    resetBtn.title = 'Clear formatting — on the highlighted word if one is selected, otherwise the whole element';
     resetBtn.style.cssText = 'padding:4px 6px;border:0;border-radius:4px;background:#333;color:#fff;cursor:pointer;font-size:11px;border-left:1px solid #333;margin-left:2px;';
-    resetBtn.addEventListener('click', function () {
-      if (!activeEl) return;
-      activeEl.style.removeProperty('color');
-      activeEl.style.removeProperty('font-weight');
-      activeEl.style.removeProperty('font-size');
+    resetBtn.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      resetFormat();
     });
 
     toolbar.appendChild(colorGroup);
@@ -261,7 +362,7 @@
     var hint = document.createElement('div');
     hint.id = 'site-editor-hint';
     hint.style.cssText = 'display:none;font-size:11px;color:#999;line-height:1.4;';
-    hint.textContent = 'Click text to edit it. A toolbar appears above the element for color/weight/size.';
+    hint.textContent = 'Click text to edit. Highlight a word to format just that word, or leave nothing highlighted to format the whole element.';
     panel.appendChild(hint);
 
     var editRow = document.createElement('div');
